@@ -1,8 +1,9 @@
 from django.db import models
-
-
+from django.contrib.contenttypes.models import ContentType
+from django.utils.encoding import python_2_unicode_compatible
 # Create your models here.
 
+@python_2_unicode_compatible
 class APais(models.Model):
 	nombre = models.CharField(max_length=255)
 	validaNit = models.CharField(max_length=255) #### Para que es este campo????
@@ -15,9 +16,10 @@ class APais(models.Model):
 			["nombre",],
 		]
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.nombre	
 
+@python_2_unicode_compatible
 class BDepartamento(models.Model):
 	nombre = models.CharField(max_length=255)
 	pais = models.ForeignKey(APais , related_name = 'fk_departamento_pais',on_delete=models.PROTECT)
@@ -30,11 +32,11 @@ class BDepartamento(models.Model):
 			["nombre","pais"],
 		]
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.nombre	
 
 
-
+@python_2_unicode_compatible
 class CMunicipio(models.Model):
 	nombre = models.CharField(max_length=255)
 	departamento = models.ForeignKey(BDepartamento , related_name = 'fk_municipio_departamento',
@@ -48,9 +50,16 @@ class CMunicipio(models.Model):
 			["nombre","departamento"],
 		]
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.nombre	
 
+	@property
+	def pais(self):
+		return departamento.pais
+
+
+
+@python_2_unicode_compatible
 class DBarrio(models.Model):
 	nombre = models.CharField(max_length=255)
 	municipio = models.ForeignKey(CMunicipio , related_name = 'fk_barrio_municipio',
@@ -64,12 +73,23 @@ class DBarrio(models.Model):
 			["nombre","municipio"],
 		]
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.nombre	
 
+	@property
+	def pais(self):
+		return municipio.departamento.pais
+
+	@property
+	def departamento(self):
+		return municipio.departamento
+
+
+@python_2_unicode_compatible
 class ETipo(models.Model):
 	nombre = models.CharField(max_length=255)
 	codigo = models.IntegerField()
+	modelo = models.ForeignKey(ContentType, on_delete=models.PROTECT, related_name='fk_tipo_modelo')
 
 	class Meta:
 		db_table = "Tipo"
@@ -79,9 +99,10 @@ class ETipo(models.Model):
 			["nombre",],
 		]
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.nombre	
 
+@python_2_unicode_compatible
 class FBanco(models.Model):
 	nombre = models.CharField(max_length=255)
 
@@ -93,5 +114,5 @@ class FBanco(models.Model):
 			["nombre",],
 		]
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.nombre	
